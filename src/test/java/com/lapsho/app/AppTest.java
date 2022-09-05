@@ -3,17 +3,24 @@ package com.lapsho.app;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
-/**
- * Unit test for simple App.
- */
+import java.util.Arrays;
+
+
 public class AppTest 
 {
-    /**
-     * Rigorous Test :-)
-     */
     @Test
-    public void shouldAnswerWithTrue()
+    public void lifeEmulation_OnValidInput3x3Gen1_ShouldPass()
     {
-        assertTrue( true );
+        int[][] input = {
+                {1,0,0},
+                {0,1,1},
+                {1,1,0}};
+        int[][] expected = {
+                {0,1,0},
+                {0,0,1},
+                {1,1,1}};
+        int[][] output = App.getGeneration(input, 1);
+
+        assertTrue(Arrays.deepEquals(expected, output), "Invalid emulation result");
     }
 }
