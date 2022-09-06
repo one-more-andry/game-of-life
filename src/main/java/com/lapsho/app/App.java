@@ -11,9 +11,9 @@ import java.lang.Integer;
  */
 public class App 
 {
-    public final static String HTMLIZE_LIFE = "▓▓";
+    private final static String HTMLIZE_LIFE = "✅";
 
-    public final static String HTMLIZE_DEATH = "░░";
+    private final static String HTMLIZE_DEATH = "❌";
 
     public static int[][] getGeneration(int[][] cells, int generations) {
         List<List<Integer>> cellsList = Arrays.stream(cells)
