@@ -21,6 +21,9 @@ public class AppTest
                 {1,1,1}};
         int[][] output = App.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output), "Invalid emulation result");
+        assertTrue(Arrays.deepEquals(expected, output),
+                "Invalid emulation result" + System.lineSeparator() +
+                        "Expected: " + System.lineSeparator() + App.htmlize(expected) + System.lineSeparator() +
+                        "Provided: " + System.lineSeparator() + App.htmlize(output));
     }
 }

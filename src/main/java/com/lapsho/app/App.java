@@ -11,15 +11,27 @@ import java.lang.Integer;
  */
 public class App 
 {
+    public final static String HTMLIZE_LIFE = "▓▓";
+
+    public final static String HTMLIZE_DEATH = "░░";
+
     public static int[][] getGeneration(int[][] cells, int generations) {
         List<List<Integer>> cellsList = Arrays.stream(cells)
-                .map(l -> Arrays.stream(l).boxed().collect(Collectors.toList()))
+                .map(subSet -> Arrays.stream(subSet).boxed().collect(Collectors.toList()))
                 .toList();
 
         return cellsList.stream()
-                .map(l -> l.stream()
+                .map(subSet -> subSet.stream()
                         .mapToInt(Integer::intValue)
                         .toArray())
                 .toArray(int[][]::new);
+    }
+
+    public static String htmlize(int[][] table) {
+        return Arrays.stream(table)
+                .map(row -> Arrays.stream(row)
+                        .mapToObj(cell -> (cell == 1) ? HTMLIZE_LIFE : HTMLIZE_DEATH)
+                        .collect(Collectors.joining("")))
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 }
