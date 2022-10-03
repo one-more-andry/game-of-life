@@ -23,24 +23,29 @@ public class App
     }
 
     public static int[][] getGeneration(int[][] cells, int generations) {
-        List<List<Integer>> cellsList = Arrays.stream(cells)
-                .map(subSet -> Arrays.stream(subSet).boxed().collect(Collectors.toList()))
-                .toList();
+        Map<Integer, List<Integer>> cellsList = new HashMap<>();
 
-        List<List<Integer>> innerMetamorphosis = calculateInnerSpace(cellsList);
-        Map<String, List<Integer>> expandedSpace = calculateExpanse(cellsList);
+        for (int i = 0; i < cells.length; i++) {
+            cellsList.put(i, Arrays.stream(cells[i]).boxed().collect(Collectors.toList()));
+        }
+
+        Map<Integer, List<Integer>> innerMetamorphosis = calculateInnerSpace(cellsList);
+        Map<Integer, List<Integer>> expandedSpace = calculateExpanse(cellsList);
         cellsList = executeMetamorphoses(cellsList, innerMetamorphosis, expandedSpace);
         cellsList = removeEmptySpace(cellsList);
-        
-        return cellsList.stream()
-                .map(subSet -> subSet.stream()
+
+        return cellsList.values()
+                .stream()
+                .map(subset -> subset
+                        .stream()
                         .mapToInt(Integer::intValue)
-                        .toArray())
+                        .toArray()
+                )
                 .toArray(int[][]::new);
     }
 
-    private static List<List<Integer>> calculateInnerSpace(List<List<Integer>> cellsList) {
-        List<List<Integer>> metamorphoses = new ArrayList<>();
+    private static Map<Integer, List<Integer>> calculateInnerSpace(Map<Integer, List<Integer>> cellsList) {
+        Map<Integer, List<Integer>> metamorphoses = new HashMap<>();
 
         for (int x = 0; x < cellsList.size(); x++) {
 
@@ -61,8 +66,8 @@ public class App
 
                 if (status != newStatus) {
 
-                    if (indexExists(cellsList, x) == false) {
-                        cellsList.set(x, new ArrayList<Integer>());
+                    if (!metamorphoses.containsKey(x)) {
+                        metamorphoses.put(x, new ArrayList<>());
                     }
                     metamorphoses.get(x).set(y, newStatus);
                 }
@@ -72,28 +77,28 @@ public class App
         return metamorphoses;
     }
 
-    private static int countNeighbors(List<List<Integer>> cellsList, int x, int y) {
+    private static int countNeighbors(Map<Integer, List<Integer>> cellsList, int x, int y) {
         int count = 0;
 
         return count;
     }
 
-    private static boolean indexExists(List<List<Integer>> cellsList, int x) {
+    private static boolean indexExists(Map<Integer, List<Integer>> cellsList, int x) {
 
         return true;
     }
 
-    private static Map<String, List<Integer>> calculateExpanse(List<List<Integer>> cellsList) {
-        Map<String, List<Integer>> expanse = new HashMap<>();
+    private static Map<Integer, List<Integer>> calculateExpanse(Map<Integer, List<Integer>> cellsList) {
+        Map<Integer, List<Integer>> expanse = new HashMap<>();
 
         return expanse;
     }
 
-    private static List<List<Integer>> executeMetamorphoses(List<List<Integer>> cellsList, List<List<Integer>> innerMetamorphosis, Map<String, List<Integer>> expandedSpace) {
+    private static Map<Integer, List<Integer>> executeMetamorphoses(Map<Integer, List<Integer>> cellsList, Map<Integer, List<Integer>> innerMetamorphosis, Map<Integer, List<Integer>> expandedSpace) {
         return cellsList;
     }
 
-    private static List<List<Integer>> removeEmptySpace(List<List<Integer>> cellsList) {
+    private static Map<Integer, List<Integer>> removeEmptySpace(Map<Integer, List<Integer>> cellsList) {
         boolean reduced = true;
 
         do {
