@@ -22,6 +22,12 @@ public class App
 
     private final static String EXPANSION_RIGHT_KEY = "right";
 
+    private final static String KEY_X = "x";
+
+    private final static String KEY_Y = "y";
+
+    private final static String KEY_STATUS = "status";
+
     public static String htmlize(int[][] table) {
         return Arrays.stream(table)
                 .map(row -> Arrays.stream(row)
@@ -44,23 +50,56 @@ public class App
     private static ArrayList<HashMap<String, Integer>> calculateInnerSpace(int[][] cells) {
         ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
 
+        for (int x = 0; x < (cells.length - 1); x++) {
+
+            for (int y = 0; y < (cells.length - 1); y++) {
+                int status = cells[x][y];
+                int neighbors = countNeighbors(cells, x, y);
+                int newStatus;
+
+                if (neighbors == 2) {
+                    newStatus = status;
+
+                } else if (neighbors == 3) {
+                    newStatus = 1;
+
+                } else {
+                    newStatus = 0;
+                }
+
+                if (status != newStatus) {
+                    HashMap<String, Integer> cell = new HashMap<String, Integer>();
+                    cell.put(KEY_X, x);
+                    cell.put(KEY_Y, y);
+                    cell.put(KEY_STATUS, newStatus);
+                    metamorphoses.add(cell);
+                }
+            }
+        }
+
         return metamorphoses;
     }
 
-    private static int countNeighbors(Map<Integer, Map<Integer, Integer>> cellsList, int x, int y) {
+    private static int countNeighbors(int[][] cells, int x, int y) {
         int count = 0;
 
         for (int neighborX = x - 1; neighborX <= (x + 1); neighborX++) {
-            if (!cellsList.containsKey(neighborX)) {
+
+            if ( (neighborX < 0) || (neighborX >= cells.length) ) {
                 continue;
             }
 
             for (int neighborY = y - 1; neighborY <= (y + 1); neighborY++) {
 
-                if (cellsList.get(neighborX).containsKey(neighborY) &&
-                        (neighborX != x || neighborY != y) &&
-                        cellsList.get(neighborX).get(neighborY) == 1
-                ) {
+                if ( (neighborY < 0) || (neighborY >= cells[neighborX].length) ) {
+                    continue;
+                }
+
+                if ( (neighborX == x) && (neighborY == y) ) {
+                    continue;
+                }
+
+                if (cells[neighborX][neighborY] == 1) {
                     count++;
                 }
             }
