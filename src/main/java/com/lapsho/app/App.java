@@ -14,6 +14,14 @@ public class App
 
     private final static String HTMLIZE_DEATH = "❌";
 
+    private final static String EXPANSION_TOP_KEY = "top";
+
+    private final static String EXPANSION_BOTTOM_KEY = "bottom";
+
+    private final static String EXPANSION_LEFT_KEY = "left";
+
+    private final static String EXPANSION_RIGHT_KEY = "right";
+
     public static String htmlize(int[][] table) {
         return Arrays.stream(table)
                 .map(row -> Arrays.stream(row)
@@ -23,60 +31,18 @@ public class App
     }
 
     public static int[][] getGeneration(int[][] cells, int generations) {
-        Map<Integer, Map<Integer, Integer>> cellsList = new HashMap<>();
-
-        for (int i = 0; i < cells.length; i++) {
-            for (int j = 0; j < cells[i].length; j++) {
-
-                if (!cellsList.containsKey(i)) {
-                    cellsList.put(i, new HashMap<>());
-                }
-                cellsList.get(i).put(j, cells[i][j]);
-            }
+        for (int i = generations; i == 0; i--) {
+            ArrayList<HashMap<String, Integer>> innerMetamorphosis = calculateInnerSpace(cells);
+            Map<String, ArrayList<Integer>> expanse = calculateExpanse(cells);
+            cells = executeMetamorphoses(cells, innerMetamorphosis, expanse);
+            cells = removeEmptySpace(cells);
         }
 
-        Map<Integer, Map<Integer, Integer>> innerMetamorphosis = calculateInnerSpace(cellsList);
-//        Map<Integer, Map<Integer, Integer>> expandedSpace = calculateExpanse(cellsList);
-//        cellsList = executeMetamorphoses(cellsList, innerMetamorphosis, expandedSpace);
-//        cellsList = removeEmptySpace(cellsList);
-
-        return cellsList.values().stream()
-                .map(subset -> subset.values().stream()
-                        .mapToInt(i -> i)
-                        .toArray()
-                )
-                .toArray(int[][]::new);
+        return cells;
     }
 
-    private static Map<Integer, Map<Integer, Integer>> calculateInnerSpace(Map<Integer, Map<Integer, Integer>> cellsList) {
-        Map<Integer, Map<Integer, Integer>> metamorphoses = new HashMap<>();
-
-        for (int x = 0; x < cellsList.size(); x++) {
-
-            for (int y = 0; y < cellsList.size(); y++) {
-                int status = cellsList.get(x).get(y);
-                int neighbors = countNeighbors(cellsList, x, y);
-                int newStatus;
-
-                if (neighbors == 2) {
-                    newStatus = status;
-
-                } else if (neighbors == 3) {
-                    newStatus = 1;
-
-                } else {
-                    newStatus = 0;
-                }
-
-                if (status != newStatus) {
-
-                    if (!metamorphoses.containsKey(x)) {
-                        metamorphoses.put(x, new HashMap<>());
-                    }
-                    metamorphoses.get(x).put(y, newStatus);
-                }
-            }
-        }
+    private static ArrayList<HashMap<String, Integer>> calculateInnerSpace(int[][] cells) {
+        ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
 
         return metamorphoses;
     }
@@ -103,17 +69,26 @@ public class App
         return count;
     }
 
-    private static Map<Integer, Map<Integer, Integer>> calculateExpanse(Map<Integer, Map<Integer, Integer>> cellsList) {
-        Map<Integer, Map<Integer, Integer>> expanse = new HashMap<>();
+    private static Map<String, ArrayList<Integer>> calculateExpanse(int[][] cells) {
+        Map<String, ArrayList<Integer>> expanse = new HashMap<>();
+        expanse.put(EXPANSION_TOP_KEY, new ArrayList<>());
+        expanse.put(EXPANSION_BOTTOM_KEY, new ArrayList<>());
+        expanse.put(EXPANSION_LEFT_KEY, new ArrayList<>());
+        expanse.put(EXPANSION_RIGHT_KEY, new ArrayList<>());
+
+        //todo: cycle for top and bottom edges; -1 x (row), x.length + 1
+        ArrayList<Integer> topCount = new ArrayList<>();
+
+        //todo: cycle for left and right edges; -1 y (column),  y.length +1
 
         return expanse;
     }
 
-    private static Map<Integer, Map<Integer, Integer>> executeMetamorphoses(Map<Integer, Map<Integer, Integer>> cellsList, Map<Integer, Map<Integer, Integer>> innerMetamorphosis, Map<Integer, Map<Integer, Integer>> expandedSpace) {
-        return cellsList;
+    private static int[][] executeMetamorphoses(int[][] cells, ArrayList<HashMap<String, Integer>> innerMetamorphosis, Map<String, ArrayList<Integer>> expanse) {
+        return cells;
     }
 
-    private static Map<Integer, Map<Integer, Integer>> removeEmptySpace(Map<Integer, Map<Integer, Integer>> cellsList) {
+    private static int[][] removeEmptySpace(int[][] cells) {
         boolean reduced = true;
 
         do {
@@ -121,6 +96,6 @@ public class App
 
         } while (reduced);
 
-        return cellsList;
+        return cells;
     }
 }
