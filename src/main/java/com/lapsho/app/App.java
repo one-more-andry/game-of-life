@@ -3,6 +3,7 @@ package com.lapsho.app;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.lang.Integer;
+import java.util.stream.Stream;
 
 /**
  * Hello world!
@@ -28,20 +29,33 @@ public class App
 
     private final static String KEY_STATUS = "status";
 
+    private final static int STATUS_ALIVE = 1;
+
+    private final static int STATUS_DEAD = 0;
+
+    private final static int NEIGHBORS_TO_KEEP_ALIVE = 2;
+
+    private final static int NEIGHBORS_TO_REVIVE = 3;
+
     public static String htmlize(int[][] table) {
         return Arrays.stream(table)
                 .map(row -> Arrays.stream(row)
-                        .mapToObj(cell -> (cell == 1) ? HTMLIZE_LIFE : HTMLIZE_DEATH)
+                        .mapToObj(cell -> (cell == STATUS_ALIVE) ? HTMLIZE_LIFE : HTMLIZE_DEATH)
                         .collect(Collectors.joining(" ")))
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 
     public static int[][] getGeneration(int[][] cells, int generations) {
+        if (generations <= 0 || cells.length < 1 || cells[0].length < 1) {
+            return cells;
+        }
+
         for (int i = generations; i == 0; i--) {
             ArrayList<HashMap<String, Integer>> innerMetamorphosis = calculateInnerSpace(cells);
             Map<String, ArrayList<Integer>> expanse = calculateExpanse(cells);
-            cells = executeMetamorphoses(cells, innerMetamorphosis, expanse);
-            cells = removeEmptySpace(cells);
+            cells = executeMetamorphoses(cells, innerMetamorphosis);
+            cells = executeExpanse(cells, expanse);
+            cells = executeCollapse(cells);
         }
 
         return cells;
@@ -50,27 +64,27 @@ public class App
     private static ArrayList<HashMap<String, Integer>> calculateInnerSpace(int[][] cells) {
         ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
 
-        for (int x = 0; x < (cells.length - 1); x++) {
+        for (int y = 0; y < (cells.length - 1); y++) {
 
-            for (int y = 0; y < (cells.length - 1); y++) {
-                int status = cells[x][y];
-                int neighbors = countNeighbors(cells, x, y);
+            for (int x = 0; x < (cells.length - 1); x++) {
+                int status = cells[y][x];
+                int neighbors = countNeighbors(cells, y, x);
                 int newStatus;
 
-                if (neighbors == 2) {
+                if (neighbors == NEIGHBORS_TO_KEEP_ALIVE) {
                     newStatus = status;
 
-                } else if (neighbors == 3) {
-                    newStatus = 1;
+                } else if (neighbors == NEIGHBORS_TO_REVIVE) {
+                    newStatus = STATUS_ALIVE;
 
                 } else {
-                    newStatus = 0;
+                    newStatus = STATUS_DEAD;
                 }
 
                 if (status != newStatus) {
                     HashMap<String, Integer> cell = new HashMap<String, Integer>();
-                    cell.put(KEY_X, x);
                     cell.put(KEY_Y, y);
+                    cell.put(KEY_X, x);
                     cell.put(KEY_STATUS, newStatus);
                     metamorphoses.add(cell);
                 }
@@ -80,26 +94,26 @@ public class App
         return metamorphoses;
     }
 
-    private static int countNeighbors(int[][] cells, int x, int y) {
+    private static int countNeighbors(int[][] cells, int y, int x) {
         int count = 0;
 
-        for (int neighborX = x - 1; neighborX <= (x + 1); neighborX++) {
+        for (int neighborY = y - 1; neighborY <= (y + 1); neighborY++) {
 
-            if ( (neighborX < 0) || (neighborX >= cells.length) ) {
+            if ( (neighborY < 0) || (neighborY >= cells.length) ) {
                 continue;
             }
 
-            for (int neighborY = y - 1; neighborY <= (y + 1); neighborY++) {
+            for (int neighborX = x - 1; neighborX <= (x + 1); neighborX++) {
 
-                if ( (neighborY < 0) || (neighborY >= cells[neighborX].length) ) {
+                if ( (neighborX < 0) || (neighborX >= cells[neighborY].length) ) {
                     continue;
                 }
 
-                if ( (neighborX == x) && (neighborY == y) ) {
+                if ( (neighborY == y) && (neighborX == x) ) {
                     continue;
                 }
 
-                if (cells[neighborX][neighborY] == 1) {
+                if (cells[neighborY][neighborX] == STATUS_ALIVE) {
                     count++;
                 }
             }
@@ -115,19 +129,71 @@ public class App
         expanse.put(EXPANSION_LEFT_KEY, new ArrayList<>());
         expanse.put(EXPANSION_RIGHT_KEY, new ArrayList<>());
 
-        //todo: cycle for top and bottom edges; -1 x (row), x.length + 1
-        ArrayList<Integer> topCount = new ArrayList<>();
+        ArrayList<Integer> topCells = new ArrayList<>();
+        ArrayList<Integer> bottomCells = new ArrayList<>();
+        ArrayList<Integer> leftCells = new ArrayList<>();
+        ArrayList<Integer> rightCells = new ArrayList<>();
 
-        //todo: cycle for left and right edges; -1 y (column),  y.length +1
+        for (int x = 0; x < cells[0].length; x++) {
+            observeLifeOnEdge(cells, topCells, 0, x, x);
+            registerExpanse(topCells, expanse, EXPANSION_TOP_KEY);
+            observeLifeOnEdge(cells, bottomCells, cells[0].length - 1, x, x);
+            registerExpanse(bottomCells, expanse, EXPANSION_BOTTOM_KEY);
+        }
+
+        for (int y = 0; y < cells.length; y++) {
+            observeLifeOnEdge(cells, leftCells, y, 0, y);
+            registerExpanse(leftCells, expanse, EXPANSION_LEFT_KEY);
+            observeLifeOnEdge(cells, rightCells, y, cells[0].length - 1, y);
+            registerExpanse(rightCells, expanse, EXPANSION_RIGHT_KEY);
+        }
 
         return expanse;
     }
 
-    private static int[][] executeMetamorphoses(int[][] cells, ArrayList<HashMap<String, Integer>> innerMetamorphosis, Map<String, ArrayList<Integer>> expanse) {
+    private static void observeLifeOnEdge(int[][] cells, ArrayList<Integer> edge, int y, int x, int indexToSave) {
+        if (cells[x][y] == STATUS_ALIVE) {
+            edge.add(indexToSave);
+
+        } else {
+            edge.clear();
+        }
+    }
+
+    private static void registerExpanse(ArrayList<Integer> edge, Map<String, ArrayList<Integer>> expanse, String key) {
+        if (edge.size() >= NEIGHBORS_TO_REVIVE) {
+            expanse.get(key).add(edge.size() - 2);//size() - 1 (last element) - 1 (medium for 3, but there could be more)
+        }
+    }
+
+    private static int[][] executeMetamorphoses(int[][] cells, ArrayList<HashMap<String, Integer>> innerMetamorphosis) {
+        for (HashMap<String, Integer> cell: innerMetamorphosis) {
+            cells[cell.get(KEY_Y)][cell.get(KEY_X)] = cell.get(KEY_STATUS);
+        }
+
         return cells;
     }
 
-    private static int[][] removeEmptySpace(int[][] cells) {
+    private static int[][] executeExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse) {
+        //  todo: reuse executeMetamorphoses
+        //  First extend the space, second convert the outer cells to inner indexes, then call the executeMetamorphoses
+        if (expanse.get(EXPANSION_TOP_KEY).size() > 0) {
+            int[][] topCells = new int[1][cells[0].length - 1];
+            //todo: concat topCells & cells
+            //todo: execute metamorphoses
+
+            for (Integer indexX: expanse.get(EXPANSION_TOP_KEY)) {
+
+            }
+        }
+        //todo: calculate the bottom expansion
+        //todo: calculate the left expansion
+        //todo: calculate the right expansion
+
+        return cells;
+    }
+
+    private static int[][] executeCollapse(int[][] cells) {
         boolean reduced = true;
 
         do {
