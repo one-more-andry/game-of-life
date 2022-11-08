@@ -3,6 +3,7 @@ package com.lapsho.app;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.lang.Integer;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -82,16 +83,22 @@ public class App
                 }
 
                 if (status != newStatus) {
-                    HashMap<String, Integer> cell = new HashMap<String, Integer>();
-                    cell.put(KEY_Y, y);
-                    cell.put(KEY_X, x);
-                    cell.put(KEY_STATUS, newStatus);
-                    metamorphoses.add(cell);
+                    metamorphoses.add(createCellDataObject(y, x, newStatus));
                 }
             }
         }
 
         return metamorphoses;
+    }
+
+    // todo: refactor to data class
+    private static HashMap<String, Integer> createCellDataObject(int y, int x, int status) {
+        HashMap<String, Integer> cell = new HashMap<String, Integer>();
+        cell.put(KEY_Y, y);
+        cell.put(KEY_X, x);
+        cell.put(KEY_STATUS, status);
+
+        return cell;
     }
 
     private static int countNeighbors(int[][] cells, int y, int x) {
@@ -175,22 +182,40 @@ public class App
     }
 
     private static int[][] executeExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse) {
-        //  todo: reuse executeMetamorphoses
-        //  First extend the space, second convert the outer cells to inner indexes, then call the executeMetamorphoses
         if (expanse.get(EXPANSION_TOP_KEY).size() > 0) {
-            int[][] topCells = new int[1][cells[0].length - 1];
-            //todo: concat topCells & cells
-            //todo: execute metamorphoses
+            ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
+            cells = mergeExtraRowToSpace(new int[1][cells[0].length - 1], cells);
 
-            for (Integer indexX: expanse.get(EXPANSION_TOP_KEY)) {
-
+            for (Integer index: expanse.get(EXPANSION_TOP_KEY)) {
+                metamorphoses.add(createCellDataObject(0, index, STATUS_ALIVE));
             }
+            cells = executeMetamorphoses(cells, metamorphoses);
         }
-        //todo: calculate the bottom expansion
+
+        if (expanse.get(EXPANSION_BOTTOM_KEY).size() > 0) {
+            ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
+            cells = mergeExtraRowToSpace(cells, new int[1][cells[0].length - 1]);
+
+            for (Integer index: expanse.get(EXPANSION_BOTTOM_KEY)) {
+                metamorphoses.add(createCellDataObject(cells.length - 1, index, STATUS_ALIVE));
+            }
+            cells = executeMetamorphoses(cells, metamorphoses);
+        }
+
         //todo: calculate the left expansion
         //todo: calculate the right expansion
 
         return cells;
+    }
+
+    private static int[][] mergeExtraRowToSpace(int[][] array1, int[][] array2) {
+        int len1 = array1.length;
+        int len2 = array2.length;
+        int[][] result = new int[len1 + len2][array1[0].length];
+        System.arraycopy(array1, 0, result, 0, len1);
+        System.arraycopy(array2, 0, result, len1, len2);
+
+        return result;
     }
 
     private static int[][] executeCollapse(int[][] cells) {
