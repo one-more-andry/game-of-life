@@ -73,10 +73,7 @@ public class AppTest
 
     @Test
     public void lifeEmulation_CellExpansion_ShouldExtendArray() {
-        int[][] input = {
-                {1,1,1},
-                {0,0,0},
-                {0,0,0}};
+        int[][] input = {{1,1,1}};
         int[][] expected = {
                 {0,1,0},
                 {1,1,1},
