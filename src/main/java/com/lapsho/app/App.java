@@ -182,30 +182,31 @@ public class App
     }
 
     private static int[][] executeExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse) {
-        if (expanse.get(EXPANSION_TOP_KEY).size() > 0) {
-            ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
-            cells = mergeExtraRowToSpace(new int[1][cells[0].length - 1], cells);
-
-            for (Integer index: expanse.get(EXPANSION_TOP_KEY)) {
-                metamorphoses.add(createCellDataObject(0, index, STATUS_ALIVE));
-            }
-            cells = executeMetamorphoses(cells, metamorphoses);
-        }
-
-        if (expanse.get(EXPANSION_BOTTOM_KEY).size() > 0) {
-            ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
-            cells = mergeExtraRowToSpace(cells, new int[1][cells[0].length - 1]);
-
-            for (Integer index: expanse.get(EXPANSION_BOTTOM_KEY)) {
-                metamorphoses.add(createCellDataObject(cells.length - 1, index, STATUS_ALIVE));
-            }
-            cells = executeMetamorphoses(cells, metamorphoses);
-        }
+        cells = executeRowExpanse(cells, expanse, EXPANSION_TOP_KEY, 0);
+        cells = executeRowExpanse(cells, expanse, EXPANSION_BOTTOM_KEY, cells.length - 1);
 
         //todo: calculate the left expansion
         //todo: calculate the right expansion
 
         return cells;
+    }
+
+    private static int[][] executeRowExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector, int y) {
+        if (expanse.get(vector).size() == 0) {
+            return cells;
+        }
+        ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
+        cells = mergeExtraRowToSpace(new int[1][cells[0].length - 1], cells);
+
+        for (Integer index: expanse.get(vector)) {
+            metamorphoses.add(createCellDataObject(y, index, STATUS_ALIVE));
+        }
+
+        return executeMetamorphoses(cells, metamorphoses);
+    }
+
+    private static int[][] executeColumnExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector, int x) {
+
     }
 
     private static int[][] mergeExtraRowToSpace(int[][] array1, int[][] array2) {
@@ -222,6 +223,7 @@ public class App
         boolean reduced = true;
 
         do {
+            //todo
             reduced = false;
 
         } while (reduced);
