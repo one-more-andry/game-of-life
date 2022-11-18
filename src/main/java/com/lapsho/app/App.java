@@ -182,31 +182,56 @@ public class App
     }
 
     private static int[][] executeExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse) {
-        cells = executeRowExpanse(cells, expanse, EXPANSION_TOP_KEY, 0);
-        cells = executeRowExpanse(cells, expanse, EXPANSION_BOTTOM_KEY, cells.length - 1);
-
-        //todo: calculate the left expansion
-        //todo: calculate the right expansion
+        cells = executeVectorExpanse(cells, expanse, EXPANSION_TOP_KEY);
+        cells = executeVectorExpanse(cells, expanse, EXPANSION_BOTTOM_KEY);
+        cells = executeVectorExpanse(cells, expanse, EXPANSION_LEFT_KEY);
+        cells = executeVectorExpanse(cells, expanse, EXPANSION_RIGHT_KEY);
 
         return cells;
     }
 
-    private static int[][] executeRowExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector, int y) {
+    private static int[][] executeVectorExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector) {
         if (expanse.get(vector).size() == 0) {
             return cells;
         }
         ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
-        cells = mergeExtraRowToSpace(new int[1][cells[0].length - 1], cells);
+        cells = mergeEmptySpace(cells, vector);
 
         for (Integer index: expanse.get(vector)) {
-            metamorphoses.add(createCellDataObject(y, index, STATUS_ALIVE));
+
+            switch (vector) {
+                case EXPANSION_TOP_KEY -> metamorphoses.add(createCellDataObject(0, index, STATUS_ALIVE));
+                case EXPANSION_BOTTOM_KEY ->
+                        metamorphoses.add(createCellDataObject(cells.length - 1, index, STATUS_ALIVE));
+                case EXPANSION_LEFT_KEY -> metamorphoses.add(createCellDataObject(index, 0, STATUS_ALIVE));
+                case EXPANSION_RIGHT_KEY ->
+                        metamorphoses.add(createCellDataObject(index, cells[0].length - 1, STATUS_ALIVE));
+            }
         }
 
         return executeMetamorphoses(cells, metamorphoses);
     }
 
-    private static int[][] executeColumnExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector, int x) {
+    private static int[][] mergeEmptySpace(int[][] cells, String vector) {
 
+        if (vector.equals(EXPANSION_TOP_KEY)) {
+            return mergeExtraRowToSpace(new int[1][cells[0].length - 1], cells);
+
+        } else if (vector.equals(EXPANSION_BOTTOM_KEY)) {
+            return mergeExtraRowToSpace(cells, new int[1][cells[0].length - 1]);
+        }
+
+        for (int rowIndex = 0; rowIndex == cells.length; rowIndex++) {
+
+            if (vector.equals(EXPANSION_LEFT_KEY)) {
+                cells = mergeExtraRowToSpace(new int[1][1], cells);
+
+            } else if (vector.equals(EXPANSION_RIGHT_KEY)) {
+                cells = mergeExtraRowToSpace(cells, new int[1][1]);
+            }
+        }
+
+        return cells;
     }
 
     private static int[][] mergeExtraRowToSpace(int[][] array1, int[][] array2) {
@@ -220,14 +245,57 @@ public class App
     }
 
     private static int[][] executeCollapse(int[][] cells) {
-        boolean reduced = true;
+        if (validateEdgeToCollapse(cells, EXPANSION_TOP_KEY)) {
 
-        do {
-            //todo
-            reduced = false;
+        }
 
-        } while (reduced);
+        if (validateEdgeToCollapse(cells, EXPANSION_BOTTOM_KEY)) {
+
+        }
+
+        if (validateEdgeToCollapse(cells, EXPANSION_LEFT_KEY)) {
+
+        }
+
+        if (validateEdgeToCollapse(cells, EXPANSION_RIGHT_KEY)) {
+
+        }
 
         return cells;
+    }
+
+    private static boolean validateEdgeToCollapse(int[][] cells, String vector) {
+        int index = 0;
+        int limit = 0;
+
+        switch (vector) {
+            case EXPANSION_TOP_KEY -> {
+                index = 0;
+                limit = cells[0].length;
+            }
+            case EXPANSION_BOTTOM_KEY -> {
+                index = cells.length - 1;
+                limit = cells[0].length;
+            }
+            case EXPANSION_LEFT_KEY -> {
+                index = 0;
+                limit = cells.length;
+            }
+            case EXPANSION_RIGHT_KEY -> {
+                index = cells[0].length - 1;
+                limit = cells.length;
+            }
+        }
+
+        for (int i = 0; i < limit; i++) {
+            int y = (vector.equals(EXPANSION_TOP_KEY) || vector.equals(EXPANSION_BOTTOM_KEY)) ? index : i;
+            int x = (vector.equals(EXPANSION_LEFT_KEY) || vector.equals(EXPANSION_RIGHT_KEY)) ? index : i;
+
+            if (cells[y][x] == STATUS_ALIVE) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
