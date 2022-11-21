@@ -245,20 +245,37 @@ public class App
     }
 
     private static int[][] executeCollapse(int[][] cells) {
-        if (validateEdgeToCollapse(cells, EXPANSION_TOP_KEY)) {
 
+        if (validateEdgeToCollapse(cells, EXPANSION_TOP_KEY)) {
+            System.arraycopy(cells, 1, cells, 0, cells.length - 1);
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_BOTTOM_KEY)) {
-
+            System.arraycopy(cells, 0, cells, 0, cells.length - 2);
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_LEFT_KEY)) {
+            int[][] collapsedCells = new int[cells.length][cells[0].length - 1];
 
+            for (int i = 0; i < cells.length; i++) {
+                int [] row = new int[cells[0].length - 1];
+                System.arraycopy(cells[i], 1, row, 0, cells[i].length - 1);
+                collapsedCells[i] = row;
+            }
+
+            cells = collapsedCells;
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_RIGHT_KEY)) {
+            int[][] collapsedCells = new int[cells.length][cells[0].length - 1];
 
+            for (int i = 0; i < cells.length; i++) {
+                int [] row = new int[cells[0].length - 1];
+                System.arraycopy(cells[i], 0, row, 0, cells[i].length - 1);
+                collapsedCells[i] = row;
+            }
+
+            cells = collapsedCells;
         }
 
         return cells;
