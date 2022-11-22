@@ -109,4 +109,32 @@ public class AppTest
                 "Empty array expected" + System.lineSeparator() +
                         "Provided: " + System.lineSeparator() + App.htmlize(output));
     }
+
+    @Test
+    public void lifeEmulation_TestTwoGliders() {
+        int[][] input = {
+                {1, 1, 1, 0, 0, 0, 1, 0},
+                {1, 0, 0, 0, 0, 0, 0, 1},
+                {0, 1, 0, 0, 0, 1, 1, 1}};
+        int[][] expected = {
+                {1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1}
+        };
+
+        int[][] output = App.getGeneration(input, 16);
+
+        assertTrue(Arrays.deepEquals(expected, output),
+                "Invalid response" + System.lineSeparator() +
+                        "Provided: " + System.lineSeparator() + App.htmlize(output) + System.lineSeparator() +
+                        "Expected: " + System.lineSeparator() + App.htmlize(expected));
+    }
 }
