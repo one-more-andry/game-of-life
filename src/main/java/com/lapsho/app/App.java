@@ -288,6 +288,10 @@ public class App
             cells = collapsedCells;
         }
 
+        if (cells.length == 0) {
+            cells = new int[1][0];
+        }
+
         return cells;
     }
 
