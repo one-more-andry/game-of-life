@@ -3,13 +3,8 @@ package com.lapsho.app;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.lang.Integer;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-/**
- * Hello world!
- *
- */
+
 public class App 
 {
     private final static String HTMLIZE_LIFE = "✅";
@@ -51,7 +46,7 @@ public class App
             return cells;
         }
 
-        for (int i = generations; i == 0; i--) {
+        for (; generations > 0; generations--) {
             ArrayList<HashMap<String, Integer>> innerMetamorphosis = calculateInnerSpace(cells);
             Map<String, ArrayList<Integer>> expanse = calculateExpanse(cells);
             cells = executeMetamorphoses(cells, innerMetamorphosis);
@@ -65,9 +60,9 @@ public class App
     private static ArrayList<HashMap<String, Integer>> calculateInnerSpace(int[][] cells) {
         ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
 
-        for (int y = 0; y < (cells.length - 1); y++) {
+        for (int y = 0; y < cells.length; y++) {
 
-            for (int x = 0; x < (cells.length - 1); x++) {
+            for (int x = 0; x < cells[y].length; x++) {
                 int status = cells[y][x];
                 int neighbors = countNeighbors(cells, y, x);
                 int newStatus;
@@ -144,7 +139,7 @@ public class App
         for (int x = 0; x < cells[0].length; x++) {
             observeLifeOnEdge(cells, topCells, 0, x, x);
             registerExpanse(topCells, expanse, EXPANSION_TOP_KEY);
-            observeLifeOnEdge(cells, bottomCells, cells[0].length - 1, x, x);
+            observeLifeOnEdge(cells, bottomCells, cells.length - 1, x, x);
             registerExpanse(bottomCells, expanse, EXPANSION_BOTTOM_KEY);
         }
 
@@ -159,7 +154,7 @@ public class App
     }
 
     private static void observeLifeOnEdge(int[][] cells, ArrayList<Integer> edge, int y, int x, int indexToSave) {
-        if (cells[x][y] == STATUS_ALIVE) {
+        if (cells[y][x] == STATUS_ALIVE) {
             edge.add(indexToSave);
 
         } else {
@@ -215,19 +210,20 @@ public class App
     private static int[][] mergeEmptySpace(int[][] cells, String vector) {
 
         if (vector.equals(EXPANSION_TOP_KEY)) {
-            return mergeExtraRowToSpace(new int[1][cells[0].length - 1], cells);
+            return mergeExtraRowToSpace(new int[1][cells[0].length], cells);
 
         } else if (vector.equals(EXPANSION_BOTTOM_KEY)) {
-            return mergeExtraRowToSpace(cells, new int[1][cells[0].length - 1]);
+            return mergeExtraRowToSpace(cells, new int[1][cells[0].length]);
         }
 
-        for (int rowIndex = 0; rowIndex == cells.length; rowIndex++) {
+        for (int rowIndex = 0; rowIndex < cells.length; rowIndex++) {
 
             if (vector.equals(EXPANSION_LEFT_KEY)) {
-                cells = mergeExtraRowToSpace(new int[1][1], cells);
+
+                cells[rowIndex] = mergeExtraColumnToSpace(new int[1], cells[rowIndex]);
 
             } else if (vector.equals(EXPANSION_RIGHT_KEY)) {
-                cells = mergeExtraRowToSpace(cells, new int[1][1]);
+                cells[rowIndex] = mergeExtraColumnToSpace(cells[rowIndex], new int[1]);
             }
         }
 
@@ -244,14 +240,28 @@ public class App
         return result;
     }
 
+    private static int[] mergeExtraColumnToSpace(int[] array1, int[] array2) {
+        int len1 = array1.length;
+        int len2 = array2.length;
+        int[] result = new int[len1 + len2];
+        System.arraycopy(array1, 0, result, 0, len1);
+        System.arraycopy(array2, 0, result, len1, len2);
+
+        return result;
+    }
+
     private static int[][] executeCollapse(int[][] cells) {
 
         if (validateEdgeToCollapse(cells, EXPANSION_TOP_KEY)) {
-            System.arraycopy(cells, 1, cells, 0, cells.length - 1);
+            int[][] reducedCells = new int[cells.length - 1][cells[0].length];
+            System.arraycopy(cells, 1, reducedCells, 0, cells.length - 1);
+            cells = reducedCells;
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_BOTTOM_KEY)) {
-            System.arraycopy(cells, 0, cells, 0, cells.length - 2);
+            int[][] reducedCells = new int[cells.length - 1][cells[0].length];
+            System.arraycopy(cells, 0, reducedCells, 0, cells.length - 1);
+            cells = reducedCells;
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_LEFT_KEY)) {
@@ -282,6 +292,9 @@ public class App
     }
 
     private static boolean validateEdgeToCollapse(int[][] cells, String vector) {
+        if (cells.length == 0) {
+            return false;
+        }
         int index = 0;
         int limit = 0;
 
@@ -309,10 +322,10 @@ public class App
             int x = (vector.equals(EXPANSION_LEFT_KEY) || vector.equals(EXPANSION_RIGHT_KEY)) ? index : i;
 
             if (cells[y][x] == STATUS_ALIVE) {
-                return true;
+                return false;
             }
         }
 
-        return false;
+        return true;
     }
 }
