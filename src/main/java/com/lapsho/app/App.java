@@ -164,7 +164,7 @@ public class App
 
     private static void registerExpanse(ArrayList<Integer> edge, Map<String, ArrayList<Integer>> expanse, String key) {
         if (edge.size() >= NEIGHBORS_TO_REVIVE) {
-            expanse.get(key).add(edge.size() - 2);//size() - 1 (last element) - 1 (medium for 3, but there could be more)
+            expanse.get(key).add(edge.get(1));
         }
     }
 
