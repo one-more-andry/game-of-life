@@ -29,7 +29,7 @@ public class AppTest
     @Test
     public void lifeEmulation_OneCell_ShouldDie() {
         int[][] input = {{1}};
-        int[][] expected = {};
+        int[][] expected = {{}};
         int[][] output = App.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
