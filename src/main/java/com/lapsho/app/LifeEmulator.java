@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import java.lang.Integer;
 
 
-public class App 
+public class LifeEmulator
 {
     private final static String HTMLIZE_LIFE = "✅";
 
@@ -41,13 +41,13 @@ public class App
                 .collect(Collectors.joining(System.lineSeparator()));
     }
 
-    public static int[][] getGeneration(int[][] cells, int generations) {
+    public int[][] getGeneration(int[][] cells, int generations) {
         if (generations <= 0 || cells.length < 1 || cells[0].length < 1) {
             return cells;
         }
 
         for (; generations > 0; generations--) {
-            ArrayList<HashMap<String, Integer>> innerMetamorphosis = calculateInnerSpace(cells);
+            ArrayList<MetamorphoseCellData> innerMetamorphosis = calculateInnerSpace(cells);
             Map<String, ArrayList<Integer>> expanse = calculateExpanse(cells);
             cells = executeMetamorphoses(cells, innerMetamorphosis);
             cells = executeExpanse(cells, expanse);
@@ -57,8 +57,8 @@ public class App
         return cells;
     }
 
-    private static ArrayList<HashMap<String, Integer>> calculateInnerSpace(int[][] cells) {
-        ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
+    private ArrayList<MetamorphoseCellData> calculateInnerSpace(int[][] cells) {
+        ArrayList<MetamorphoseCellData> metamorphoses = new ArrayList<>();
 
         for (int y = 0; y < cells.length; y++) {
 
@@ -78,7 +78,7 @@ public class App
                 }
 
                 if (status != newStatus) {
-                    metamorphoses.add(createCellDataObject(y, x, newStatus));
+                    metamorphoses.add(new MetamorphoseCellData(y, x, newStatus));
                 }
             }
         }
@@ -86,17 +86,7 @@ public class App
         return metamorphoses;
     }
 
-    // todo: refactor to data class
-    private static HashMap<String, Integer> createCellDataObject(int y, int x, int status) {
-        HashMap<String, Integer> cell = new HashMap<String, Integer>();
-        cell.put(KEY_Y, y);
-        cell.put(KEY_X, x);
-        cell.put(KEY_STATUS, status);
-
-        return cell;
-    }
-
-    private static int countNeighbors(int[][] cells, int y, int x) {
+    private int countNeighbors(int[][] cells, int y, int x) {
         int count = 0;
 
         for (int neighborY = y - 1; neighborY <= (y + 1); neighborY++) {
@@ -124,7 +114,7 @@ public class App
         return count;
     }
 
-    private static Map<String, ArrayList<Integer>> calculateExpanse(int[][] cells) {
+    private Map<String, ArrayList<Integer>> calculateExpanse(int[][] cells) {
         Map<String, ArrayList<Integer>> expanse = new HashMap<>();
         expanse.put(EXPANSION_TOP_KEY, new ArrayList<>());
         expanse.put(EXPANSION_BOTTOM_KEY, new ArrayList<>());
@@ -153,7 +143,7 @@ public class App
         return expanse;
     }
 
-    private static void observeLifeOnEdge(int[][] cells, ArrayList<Integer> edge, int y, int x, int indexToSave) {
+    private void observeLifeOnEdge(int[][] cells, ArrayList<Integer> edge, int y, int x, int indexToSave) {
         if (cells[y][x] == STATUS_ALIVE) {
             edge.add(indexToSave);
 
@@ -162,21 +152,21 @@ public class App
         }
     }
 
-    private static void registerExpanse(ArrayList<Integer> edge, Map<String, ArrayList<Integer>> expanse, String key) {
+    private void registerExpanse(ArrayList<Integer> edge, Map<String, ArrayList<Integer>> expanse, String key) {
         if (edge.size() >= NEIGHBORS_TO_REVIVE) {
             expanse.get(key).add(edge.get(1));
         }
     }
 
-    private static int[][] executeMetamorphoses(int[][] cells, ArrayList<HashMap<String, Integer>> innerMetamorphosis) {
-        for (HashMap<String, Integer> cell: innerMetamorphosis) {
-            cells[cell.get(KEY_Y)][cell.get(KEY_X)] = cell.get(KEY_STATUS);
+    private int[][] executeMetamorphoses(int[][] cells, ArrayList<MetamorphoseCellData> innerMetamorphosis) {
+        for (MetamorphoseCellData cell: innerMetamorphosis) {
+            cells[cell.getColumn()][cell.getRow()] = cell.getStatus();
         }
 
         return cells;
     }
 
-    private static int[][] executeExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse) {
+    private int[][] executeExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse) {
         cells = executeVectorExpanse(cells, expanse, EXPANSION_TOP_KEY);
         cells = executeVectorExpanse(cells, expanse, EXPANSION_BOTTOM_KEY);
         cells = executeVectorExpanse(cells, expanse, EXPANSION_LEFT_KEY);
@@ -185,29 +175,29 @@ public class App
         return cells;
     }
 
-    private static int[][] executeVectorExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector) {
+    private int[][] executeVectorExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector) {
         if (expanse.get(vector).size() == 0) {
             return cells;
         }
-        ArrayList<HashMap<String, Integer>> metamorphoses = new ArrayList<>();
+        ArrayList<MetamorphoseCellData> metamorphoses = new ArrayList<>();
         cells = mergeEmptySpace(cells, vector);
 
         for (Integer index: expanse.get(vector)) {
 
             switch (vector) {
-                case EXPANSION_TOP_KEY -> metamorphoses.add(createCellDataObject(0, index, STATUS_ALIVE));
+                case EXPANSION_TOP_KEY -> metamorphoses.add(new MetamorphoseCellData(0, index, STATUS_ALIVE));
                 case EXPANSION_BOTTOM_KEY ->
-                        metamorphoses.add(createCellDataObject(cells.length - 1, index, STATUS_ALIVE));
-                case EXPANSION_LEFT_KEY -> metamorphoses.add(createCellDataObject(index, 0, STATUS_ALIVE));
+                        metamorphoses.add(new MetamorphoseCellData(cells.length - 1, index, STATUS_ALIVE));
+                case EXPANSION_LEFT_KEY -> metamorphoses.add(new MetamorphoseCellData(index, 0, STATUS_ALIVE));
                 case EXPANSION_RIGHT_KEY ->
-                        metamorphoses.add(createCellDataObject(index, cells[0].length - 1, STATUS_ALIVE));
+                        metamorphoses.add(new MetamorphoseCellData(index, cells[0].length - 1, STATUS_ALIVE));
             }
         }
 
         return executeMetamorphoses(cells, metamorphoses);
     }
 
-    private static int[][] mergeEmptySpace(int[][] cells, String vector) {
+    private int[][] mergeEmptySpace(int[][] cells, String vector) {
 
         if (vector.equals(EXPANSION_TOP_KEY)) {
             return mergeExtraRowToSpace(new int[1][cells[0].length], cells);
@@ -230,7 +220,7 @@ public class App
         return cells;
     }
 
-    private static int[][] mergeExtraRowToSpace(int[][] array1, int[][] array2) {
+    private int[][] mergeExtraRowToSpace(int[][] array1, int[][] array2) {
         int len1 = array1.length;
         int len2 = array2.length;
         int[][] result = new int[len1 + len2][array1[0].length];
@@ -240,7 +230,7 @@ public class App
         return result;
     }
 
-    private static int[] mergeExtraColumnToSpace(int[] array1, int[] array2) {
+    private int[] mergeExtraColumnToSpace(int[] array1, int[] array2) {
         int len1 = array1.length;
         int len2 = array2.length;
         int[] result = new int[len1 + len2];
@@ -250,7 +240,7 @@ public class App
         return result;
     }
 
-    private static int[][] executeCollapse(int[][] cells) {
+    private int[][] executeCollapse(int[][] cells) {
 
         if (validateEdgeToCollapse(cells, EXPANSION_TOP_KEY)) {
             int[][] reducedCells = new int[cells.length - 1][cells[0].length];
@@ -295,7 +285,7 @@ public class App
         return cells;
     }
 
-    private static boolean validateEdgeToCollapse(int[][] cells, String vector) {
+    private boolean validateEdgeToCollapse(int[][] cells, String vector) {
         if (cells.length == 0) {
             return false;
         }
@@ -331,5 +321,31 @@ public class App
         }
 
         return true;
+    }
+
+    private class MetamorphoseCellData {
+        private int column;
+
+        private int row;
+
+        private int status;
+
+        MetamorphoseCellData(int y, int x, int status) {
+            this.column = y;
+            this.row = x;
+            this.status = status;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+
+        public int getRow() {
+            return row;
+        }
+
+        public int getStatus() {
+            return status;
+        }
     }
 }

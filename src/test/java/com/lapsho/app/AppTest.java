@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 public class AppTest 
 {
+    private LifeEmulator emulator = new LifeEmulator();
+
     @Test
     public void lifeEmulation_OnValidInput3x3Gen1_ShouldPass() {
         int[][] input = {
@@ -18,23 +20,23 @@ public class AppTest
                 {0,1,0},
                 {0,0,1},
                 {1,1,1}};
-        int[][] output = App.getGeneration(input, 1);
+        int[][] output = emulator.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "Invalid emulation result" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + App.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output));
+                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
     }
 
     @Test
     public void lifeEmulation_OneCell_ShouldDie() {
         int[][] input = {{1}};
         int[][] expected = {{}};
-        int[][] output = App.getGeneration(input, 1);
+        int[][] output = emulator.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "The output should be empty" + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output));
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
     }
 
     @Test
@@ -45,12 +47,12 @@ public class AppTest
         int[][] expected = {
                 {1,1},
                 {1,1}};
-        int[][] output = App.getGeneration(input, 1);
+        int[][] output = emulator.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "Invalid emulation" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + App.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output));
+                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
     }
 
     @Test
@@ -60,12 +62,12 @@ public class AppTest
                 {1},
                 {1},
                 {1}};
-        int[][] output = App.getGeneration(input, 1);
+        int[][] output = emulator.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "Invalid emulation" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + App.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output));
+                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
     }
 
     @Test
@@ -75,12 +77,12 @@ public class AppTest
                 {1},
                 {1}};
         int[][] expected = {{1,1,1}};
-        int[][] output = App.getGeneration(input, 1);
+        int[][] output = emulator.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "Invalid emulation" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + App.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output));
+                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
     }
 
     @Test
@@ -91,23 +93,23 @@ public class AppTest
         int[][] expected = {
                 {1,1},
                 {1,1}};
-        int[][] output = App.getGeneration(input, 1);
+        int[][] output = emulator.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "Invalid emulation" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + App.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output));
+                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
     }
 
     @Test
     public void lifeEmulation_NoLivingCells_EmptyArrayShouldBeReturned() {
         int[][] input = {{}};
         int[][] expected = {{}};
-        int[][] output = App.getGeneration(input, 1);
+        int[][] output = emulator.getGeneration(input, 1);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "Empty array expected" + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output));
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
     }
 
     @Test
@@ -130,11 +132,11 @@ public class AppTest
                 {0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1}
         };
 
-        int[][] output = App.getGeneration(input, 16);
+        int[][] output = emulator.getGeneration(input, 16);
 
         assertTrue(Arrays.deepEquals(expected, output),
                 "Invalid response" + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + App.htmlize(output) + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + App.htmlize(expected));
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output) + System.lineSeparator() +
+                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected));
     }
 }
