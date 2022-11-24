@@ -19,12 +19,6 @@ public class LifeEmulator
 
     private final static String EXPANSION_RIGHT_KEY = "right";
 
-    private final static String KEY_X = "x";
-
-    private final static String KEY_Y = "y";
-
-    private final static String KEY_STATUS = "status";
-
     private final static int STATUS_ALIVE = 1;
 
     private final static int STATUS_DEAD = 0;
@@ -115,6 +109,7 @@ public class LifeEmulator
     }
 
     private Map<String, ArrayList<Integer>> calculateExpanse(int[][] cells) {
+        // todo: reduce
         Map<String, ArrayList<Integer>> expanse = new HashMap<>();
         expanse.put(EXPANSION_TOP_KEY, new ArrayList<>());
         expanse.put(EXPANSION_BOTTOM_KEY, new ArrayList<>());
@@ -177,6 +172,7 @@ public class LifeEmulator
 
     private int[][] executeVectorExpanse(int[][] cells, Map<String, ArrayList<Integer>> expanse, String vector) {
         if (expanse.get(vector).size() == 0) {
+
             return cells;
         }
         ArrayList<MetamorphoseCellData> metamorphoses = new ArrayList<>();
@@ -185,10 +181,12 @@ public class LifeEmulator
         for (Integer index: expanse.get(vector)) {
 
             switch (vector) {
-                case EXPANSION_TOP_KEY -> metamorphoses.add(new MetamorphoseCellData(0, index, STATUS_ALIVE));
+                case EXPANSION_TOP_KEY ->
+                        metamorphoses.add(new MetamorphoseCellData(0, index, STATUS_ALIVE));
                 case EXPANSION_BOTTOM_KEY ->
                         metamorphoses.add(new MetamorphoseCellData(cells.length - 1, index, STATUS_ALIVE));
-                case EXPANSION_LEFT_KEY -> metamorphoses.add(new MetamorphoseCellData(index, 0, STATUS_ALIVE));
+                case EXPANSION_LEFT_KEY ->
+                        metamorphoses.add(new MetamorphoseCellData(index, 0, STATUS_ALIVE));
                 case EXPANSION_RIGHT_KEY ->
                         metamorphoses.add(new MetamorphoseCellData(index, cells[0].length - 1, STATUS_ALIVE));
             }
@@ -200,27 +198,26 @@ public class LifeEmulator
     private int[][] mergeEmptySpace(int[][] cells, String vector) {
 
         if (vector.equals(EXPANSION_TOP_KEY)) {
-            return mergeExtraRowToSpace(new int[1][cells[0].length], cells);
+            return mergeExtraSpace(new int[1][cells[0].length], cells);
 
         } else if (vector.equals(EXPANSION_BOTTOM_KEY)) {
-            return mergeExtraRowToSpace(cells, new int[1][cells[0].length]);
+            return mergeExtraSpace(cells, new int[1][cells[0].length]);
         }
 
         for (int rowIndex = 0; rowIndex < cells.length; rowIndex++) {
 
             if (vector.equals(EXPANSION_LEFT_KEY)) {
-
-                cells[rowIndex] = mergeExtraColumnToSpace(new int[1], cells[rowIndex]);
+                cells[rowIndex] = mergeExtraSpace(new int[1], cells[rowIndex]);
 
             } else if (vector.equals(EXPANSION_RIGHT_KEY)) {
-                cells[rowIndex] = mergeExtraColumnToSpace(cells[rowIndex], new int[1]);
+                cells[rowIndex] = mergeExtraSpace(cells[rowIndex], new int[1]);
             }
         }
 
         return cells;
     }
 
-    private int[][] mergeExtraRowToSpace(int[][] array1, int[][] array2) {
+    private int[][] mergeExtraSpace(int[][] array1, int[][] array2) {
         int len1 = array1.length;
         int len2 = array2.length;
         int[][] result = new int[len1 + len2][array1[0].length];
@@ -230,7 +227,7 @@ public class LifeEmulator
         return result;
     }
 
-    private int[] mergeExtraColumnToSpace(int[] array1, int[] array2) {
+    private int[] mergeExtraSpace(int[] array1, int[] array2) {
         int len1 = array1.length;
         int len2 = array2.length;
         int[] result = new int[len1 + len2];
@@ -243,39 +240,19 @@ public class LifeEmulator
     private int[][] executeCollapse(int[][] cells) {
 
         if (validateEdgeToCollapse(cells, EXPANSION_TOP_KEY)) {
-            int[][] reducedCells = new int[cells.length - 1][cells[0].length];
-            System.arraycopy(cells, 1, reducedCells, 0, cells.length - 1);
-            cells = reducedCells;
+            cells = executeVerticalCollapse(cells, 1);
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_BOTTOM_KEY)) {
-            int[][] reducedCells = new int[cells.length - 1][cells[0].length];
-            System.arraycopy(cells, 0, reducedCells, 0, cells.length - 1);
-            cells = reducedCells;
+            cells = executeVerticalCollapse(cells, 0);
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_LEFT_KEY)) {
-            int[][] collapsedCells = new int[cells.length][cells[0].length - 1];
-
-            for (int i = 0; i < cells.length; i++) {
-                int [] row = new int[cells[0].length - 1];
-                System.arraycopy(cells[i], 1, row, 0, cells[i].length - 1);
-                collapsedCells[i] = row;
-            }
-
-            cells = collapsedCells;
+            cells = executeHorizontalCollapse(cells, 1);
         }
 
         if (validateEdgeToCollapse(cells, EXPANSION_RIGHT_KEY)) {
-            int[][] collapsedCells = new int[cells.length][cells[0].length - 1];
-
-            for (int i = 0; i < cells.length; i++) {
-                int [] row = new int[cells[0].length - 1];
-                System.arraycopy(cells[i], 0, row, 0, cells[i].length - 1);
-                collapsedCells[i] = row;
-            }
-
-            cells = collapsedCells;
+            cells = executeHorizontalCollapse(cells, 0);
         }
 
         if (cells.length == 0) {
@@ -283,6 +260,25 @@ public class LifeEmulator
         }
 
         return cells;
+    }
+
+    private int[][] executeVerticalCollapse(int[][] cells, int vector) {
+        int[][] reducedCells = new int[cells.length - 1][cells[0].length];
+        System.arraycopy(cells, vector, reducedCells, 0, cells.length - 1);
+
+        return reducedCells;
+    }
+
+    private int[][] executeHorizontalCollapse(int[][] cells, int vector) {
+        int[][] collapsedCells = new int[cells.length][cells[0].length - 1];
+
+        for (int i = 0; i < cells.length; i++) {
+            int [] row = new int[cells[0].length - 1];
+            System.arraycopy(cells[i], vector, row, 0, cells[i].length - 1);
+            collapsedCells[i] = row;
+        }
+
+        return collapsedCells;
     }
 
     private boolean validateEdgeToCollapse(int[][] cells, String vector) {
