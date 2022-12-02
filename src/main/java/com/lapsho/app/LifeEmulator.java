@@ -39,16 +39,17 @@ public class LifeEmulator
         if (generations <= 0 || cells.length < 1 || cells[0].length < 1) {
             return cells;
         }
+        int[][] cellsProxy = cloneMultidimensional(cells);
 
         for (; generations > 0; generations--) {
-            ArrayList<MetamorphoseCellData> innerMetamorphosis = calculateInnerSpace(cells);
-            Map<String, ArrayList<Integer>> expanse = calculateExpanse(cells);
-            cells = executeMetamorphoses(cells, innerMetamorphosis);
-            cells = executeExpanse(cells, expanse);
-            cells = executeCollapse(cells);
+            ArrayList<MetamorphoseCellData> innerMetamorphosis = calculateInnerSpace(cellsProxy);
+            Map<String, ArrayList<Integer>> expanse = calculateExpanse(cellsProxy);
+            cellsProxy = executeMetamorphoses(cellsProxy, innerMetamorphosis);
+            cellsProxy = executeExpanse(cellsProxy, expanse);
+            cellsProxy = executeCollapse(cellsProxy);
         }
 
-        return cells;
+        return cellsProxy;
     }
 
     private ArrayList<MetamorphoseCellData> calculateInnerSpace(int[][] cells) {
@@ -109,12 +110,12 @@ public class LifeEmulator
     }
 
     private Map<String, ArrayList<Integer>> calculateExpanse(int[][] cells) {
-        // todo: reduce
-        Map<String, ArrayList<Integer>> expanse = new HashMap<>();
-        expanse.put(EXPANSION_TOP_KEY, new ArrayList<>());
-        expanse.put(EXPANSION_BOTTOM_KEY, new ArrayList<>());
-        expanse.put(EXPANSION_LEFT_KEY, new ArrayList<>());
-        expanse.put(EXPANSION_RIGHT_KEY, new ArrayList<>());
+        Map<String, ArrayList<Integer>> expanse = Map.of(
+                EXPANSION_TOP_KEY, new ArrayList<>(),
+                EXPANSION_BOTTOM_KEY, new ArrayList<>(),
+                EXPANSION_LEFT_KEY, new ArrayList<>(),
+                EXPANSION_RIGHT_KEY, new ArrayList<>()
+        );
 
         ArrayList<Integer> topCells = new ArrayList<>();
         ArrayList<Integer> bottomCells = new ArrayList<>();
@@ -317,6 +318,17 @@ public class LifeEmulator
         }
 
         return true;
+    }
+
+    //todo: experiment with generic
+    private int[][] cloneMultidimensional(int[][] cells) {
+        int[][] proxy = new int[cells.length][cells[0].length];
+
+        for (int i = 0; i < cells.length; i++) {
+            proxy[i] = cells[i].clone();
+        }
+
+        return proxy;
     }
 
     private class MetamorphoseCellData {

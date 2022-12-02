@@ -2,14 +2,26 @@ package com.lapsho.app;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
-
 import java.util.Arrays;
+import static org.assertj.core.api.Assertions.*;
 
 
 public class AppTest 
 {
     private LifeEmulator emulator = new LifeEmulator();
 
+    @Test
+    public void lifeEmulation_Input_ShouldNotBeMutated() {
+        int[][] inputOrigin = {
+                {0,1},
+                {1,1}};
+        int[][] input = {
+                {0,1},
+                {1,1}};
+        emulator.getGeneration(input, 1);
+
+        assertThat(inputOrigin).as("The method should not mutate the input").isDeepEqualTo(input);
+    }
     @Test
     public void lifeEmulation_OnValidInput3x3Gen1_ShouldPass() {
         int[][] input = {
