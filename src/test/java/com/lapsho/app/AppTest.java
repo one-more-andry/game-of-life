@@ -34,10 +34,7 @@ public class AppTest
                 {1,1,1}};
         int[][] output = emulator.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "Invalid emulation result" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
+        assertThat(output).isDeepEqualTo(expected);
     }
 
     @Test
@@ -46,9 +43,7 @@ public class AppTest
         int[][] expected = {{}};
         int[][] output = emulator.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "The output should be empty" + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
+        assertThat(output).isDeepEqualTo(expected);
     }
 
     @Test
@@ -61,10 +56,7 @@ public class AppTest
                 {1,1}};
         int[][] output = emulator.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "Invalid emulation" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
+        assertThat(output).isDeepEqualTo(expected);
     }
 
     @Test
@@ -76,10 +68,11 @@ public class AppTest
                 {1}};
         int[][] output = emulator.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "Invalid emulation" + System.lineSeparator() +
+        assertThat(output)
+                .as("Invalid emulation" + System.lineSeparator() +
                         "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output))
+                .isDeepEqualTo(expected);
     }
 
     @Test
@@ -91,10 +84,11 @@ public class AppTest
         int[][] expected = {{1,1,1}};
         int[][] output = emulator.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "Invalid emulation" + System.lineSeparator() +
+        assertThat(output)
+                .as("Invalid emulation" + System.lineSeparator() +
                         "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
+                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output))
+                .isDeepEqualTo(expected);
     }
 
     @Test
@@ -107,10 +101,7 @@ public class AppTest
                 {1,1}};
         int[][] output = emulator.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "Invalid emulation" + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected) + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
+        assertThat(output).isDeepEqualTo(expected);
     }
 
     @Test
@@ -119,9 +110,7 @@ public class AppTest
         int[][] expected = {{}};
         int[][] output = emulator.getGeneration(input, 1);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "Empty array expected" + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output));
+        assertThat(output).as("Empty array expected").isDeepEqualTo(expected);
     }
 
     @Test
@@ -146,9 +135,9 @@ public class AppTest
 
         int[][] output = emulator.getGeneration(input, 16);
 
-        assertTrue(Arrays.deepEquals(expected, output),
-                "Invalid response" + System.lineSeparator() +
-                        "Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output) + System.lineSeparator() +
-                        "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected));
+        assertThat(output)
+                .as("Provided: " + System.lineSeparator() + LifeEmulator.htmlize(output) + System.lineSeparator() +
+                "Expected: " + System.lineSeparator() + LifeEmulator.htmlize(expected))
+                .isDeepEqualTo(expected);
     }
 }
